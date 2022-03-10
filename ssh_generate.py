@@ -111,6 +111,8 @@ def main():
     # Set to github or bitbucket
     VCS = convert_vcs(sys.argv[3])
 
+    PROJECT = sys.argv[4]
+
     headers = {'Circle-Token': CIRCLE_API_TOKEN, 'Content-type': 'application/json'}
 
     projects_url = "https://circleci.com/api/v1.1/organization/{vcs}/{org}/settings".format(vcs=VCS, org=ORG)
@@ -135,6 +137,13 @@ def main():
         if len(project['followers']) > 0 and org_name == ORG:
             project_names.append(project_name)
 
+    if PROJECT:
+        if PROJECT in project_names:
+            # filter the list down to just a single project
+            project_names = [ PROJECT ]
+        else:
+            raise Exception("project name {PROJECT} is not found in list of projects".format(PROJECT=PROJECT))
+        
     for project in project_names:
         # Pulls all checkout keys for a project
         ssh_keys_url = "https://circleci.com/api/v2/project/{vcs}/{org}/{project}/checkout-key".format(vcs=VCS, org=ORG, project=project)
